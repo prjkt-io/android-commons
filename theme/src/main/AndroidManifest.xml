@@ -1,0 +1,13 @@
+<!--
+  ~ Copyright (c) 2019, Projekt Development LLC.
+  ~
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="projekt.commons.theme">
+    <application>
+        <activity android:name=".internal.ThemeAppInitializeActivity"
+            android:theme="@style/TransparentTheme" />
+    </application>
+</manifest>

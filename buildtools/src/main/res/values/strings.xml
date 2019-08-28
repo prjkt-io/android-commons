@@ -1,0 +1,9 @@
+<!--
+  ~ Copyright (c) 2019, Projekt Development LLC.
+  ~
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<resources>
+    <string name="app_name">Build Tools</string>
+</resources>

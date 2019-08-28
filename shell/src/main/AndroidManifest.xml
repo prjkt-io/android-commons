@@ -1,0 +1,7 @@
+<!--
+  ~ Copyright (c) 2019, Projekt Development LLC.
+  ~
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<manifest package="projekt.commons.shell" />
