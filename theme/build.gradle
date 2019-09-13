@@ -43,8 +43,8 @@ dependencies {
 }
 
 dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'gfm'
+    outputDirectory = "$rootDir/docs/1.x/"
 }
 
 apply from: 'https://raw.githubusercontent.com/sky-uk/gradle-maven-plugin/master/gradle-mavenizer.gradle'

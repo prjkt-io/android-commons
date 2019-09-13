@@ -22,4 +22,9 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
+dokka {
+    outputFormat = 'gfm'
+    outputDirectory = "$rootDir/docs/1.x/"
+}
+
 apply from: 'https://raw.githubusercontent.com/sky-uk/gradle-maven-plugin/master/gradle-mavenizer.gradle'

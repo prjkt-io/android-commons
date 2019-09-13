@@ -1,0 +1,42 @@
+site_name: android-commons
+repo_name: android-commons
+repo_url: https://github.com/prjkt-io/android-commons
+site_description: "Common code for building rich applications around Android's theming abilities"
+site_author: Projekt Development LLC.
+remote_branch: gh-pages
+
+copyright: 'Copyright &copy; 2019 Projekt Development LLC.'
+
+theme:
+  name: 'material'
+  favicon: images/favicon.png
+  logo: images/favicon.png
+  palette:
+    primary: 'teal'
+    accent: 'white'
+
+extra_css:
+  - 'css/app.css'
+
+markdown_extensions:
+  - smarty
+  - codehilite:
+      guess_lang: false
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - tables
+
+nav:
+  - '1.x API':
+    - 'buildtools': '1.x/buildtools'
+    - 'shell': '1.x/shell'
+    - 'theme': '1.x/theme'
