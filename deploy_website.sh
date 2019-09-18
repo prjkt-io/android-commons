@@ -8,7 +8,7 @@
 
 set -ex
 
-REPO="git@github.com:prjkt-io/android-commons.git"
+REPO="https://github.com/prjkt-io/android-commons.git"
 DIR=temp-clone
 
 # Delete any existing temporary website clone
@@ -38,9 +38,6 @@ cat README.md | grep -v 'svg' >docs/index.md
 
 # Build the site and push the new files up to GitHub
 mkdocs gh-deploy
-
-git checkout gh-pages
-git push
 
 # Delete our temp folder
 cd ..
