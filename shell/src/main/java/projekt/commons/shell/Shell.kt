@@ -16,7 +16,7 @@ import kotlin.collections.ArrayList
  * Main class for shell helpers, by default non-root shell will be initialized.
  */
 object Shell {
-    private var proc = Runtime.getRuntime().exec("sh")
+    private var proc = ProcessBuilder("sh").apply { redirectErrorStream(true) }.start()
     private var writer = DataOutputStream(proc.outputStream)
     private var outputReader = BufferedReader(InputStreamReader(proc.inputStream))
     private var isRoot = false
@@ -25,7 +25,7 @@ object Shell {
      * Reinitialize shell process with root access
      */
     fun reinitWithRoot() {
-        proc = Runtime.getRuntime().exec("su")
+        proc = ProcessBuilder("su").apply { redirectErrorStream(true) }.start()
         writer = DataOutputStream(proc.outputStream)
         outputReader = BufferedReader(InputStreamReader(proc.inputStream))
         isRoot = true
