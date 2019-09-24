@@ -16,9 +16,7 @@ import projekt.commons.shell.Shell
 import projekt.commons.theme.ThemeApp.OVERLAY_PERMISSION
 import projekt.commons.theme.ThemeApp.SAMSUNG_OVERLAY_PERMISSION
 import projekt.commons.theme.internal.METADATA_INSTALL_TIMESTAMP
-import java.io.File
-import java.io.FileWriter
-import java.io.StringWriter
+import java.io.*
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
@@ -235,21 +233,30 @@ class OverlayBuilder(
             command.append('\n')
 
             // Run command and see
-            val shellResult = Shell.exec(command.toString())
-            val shellOutput = shellResult.output
-            if (shellOutput.contains("types not allowed")) {
-                val forceNewCompiler = PreferenceManager
-                    .getDefaultSharedPreferences(ThemeApplication.instance)
-                    .getBoolean("force_new_compiler", false)
-                if (!doLegacyCompile && !forceNewCompiler) {
-                    doLegacyCompile = true
-                } else {
-                    // Still failed with legacy compile, throw error
-                    return Result.Failure(shellOutput.joinToString("\n"))
+            var error = ""
+            val process = Runtime.getRuntime().exec(command.toString())
+            process.waitFor()
+            BufferedReader(InputStreamReader(process.errorStream)).use { err ->
+                err.forEachLine { line ->
+                    if (line.contains("types not allowed")) {
+                        val forceNewCompiler = PreferenceManager
+                            .getDefaultSharedPreferences(ThemeApplication.instance)
+                            .getBoolean("force_new_compiler", false)
+                        if (!doLegacyCompile && !forceNewCompiler) {
+                            doLegacyCompile = true
+                        } else {
+                            // Still failed with legacy compile, throw error
+                            error = "$error\n${line}"
+                        }
+                    } else {
+                        // If output exists then compilation is failed
+                        error = "$error\n${line}"
+                    }
                 }
-            } else if (shellOutput.isNotEmpty()) {
-                // If output exists then compilation is failed
-                return Result.Failure(shellOutput.joinToString("\n"))
+            }
+            process.destroy()
+            if (!doLegacyCompile && error.isNotEmpty()) {
+                return Result.Failure(error)
             }
         } while (doLegacyCompile)
 
