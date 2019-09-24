@@ -36,14 +36,11 @@ object ThemeApp {
     internal const val EXTRA_WITH_PIE_ROOT = "intent.extra.WITH_PIE_ROOT"
     internal const val EXTRA_WITH_ANDROMEDA_SAMSUNG = "intent.extra.WITH_SUNGSTROMEDA"
     internal const val EXTRA_WITH_SYNERGY = "intent.extra.WITH_SYNERGY"
-    internal const val EXTRA_ARM_SUPPORT = "intent.extra.ARM_SUPPORT"
-    internal const val EXTRA_ARM64_SUPPORT = "intent.extra.ARM64_SUPPORT"
     internal const val EXTRA_RESULT_CODE = "intent.extra.RESULT_CODE"
 
     internal const val RESULT_PASS = -1
     internal const val RESULT_UNKNOWN = 0
     internal const val RESULT_NO_SUPPORTED_BACKEND = 1
-    internal const val RESULT_ARCH_NOT_SUPPORTED = 2
     internal const val RESULT_ROOT_DENIED = 3
     internal const val RESULT_ROOT_NOT_SUPPORTED = 4
     internal const val RESULT_MAGISK_DISABLED = 5
@@ -163,8 +160,6 @@ object ThemeApp {
         bundle.putBoolean(EXTRA_WITH_PIE_ROOT, options.withPieRoot)
         bundle.putBoolean(EXTRA_WITH_ANDROMEDA_SAMSUNG, options.withAndromedaSamsung)
         bundle.putBoolean(EXTRA_WITH_SYNERGY, options.withSynergy)
-        bundle.putBoolean(EXTRA_ARM_SUPPORT, options.armSupport)
-        bundle.putBoolean(EXTRA_ARM64_SUPPORT, options.arm64Support)
         return Intent(context, ThemeAppInitializeActivity::class.java).putExtras(bundle)
     }
 
@@ -177,7 +172,6 @@ object ThemeApp {
         return when (intent.getIntExtra(EXTRA_RESULT_CODE, RESULT_UNKNOWN)) {
             RESULT_PASS -> InitResult.Success
             RESULT_NO_SUPPORTED_BACKEND -> InitResult.NoSupportedBackendFailure
-            RESULT_ARCH_NOT_SUPPORTED -> InitResult.ArchNotSupportedFailure
             RESULT_ROOT_DENIED -> InitResult.RootDeniedFailure
             RESULT_ROOT_NOT_SUPPORTED -> InitResult.RootNotSupportedFailure
             RESULT_MAGISK_DISABLED -> InitResult.MagiskDisabledFailure
@@ -356,12 +350,6 @@ object ThemeApp {
          * available on the device.
          */
         object NoSupportedBackendFailure : InitResult()
-
-        /**
-         * Initialization is failed because host architecture is not
-         * supported.
-         */
-        object ArchNotSupportedFailure : InitResult()
 
         /**
          * Initialization is failed because a root [Backend] is going
