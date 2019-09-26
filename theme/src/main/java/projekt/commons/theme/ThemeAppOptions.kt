@@ -15,7 +15,9 @@ class ThemeAppOptions private constructor(
         internal val withRoot: Boolean,
         internal val withPieRoot: Boolean,
         internal val withAndromedaSamsung: Boolean,
-        internal val withSynergy: Boolean
+        internal val withSynergy: Boolean,
+        internal val armSupport: Boolean,
+        internal val arm64Support: Boolean
 ) {
 
     private constructor(builder: Builder) : this(
@@ -24,7 +26,9 @@ class ThemeAppOptions private constructor(
             builder.rootSupport,
             builder.pieRootSupport,
             builder.andromedaSamsungSupport,
-            builder.synergySupport
+            builder.synergySupport,
+            builder.armSupport,
+            builder.arm64Support
     )
 
     companion object {
@@ -69,6 +73,16 @@ class ThemeAppOptions private constructor(
          * Whether to support device with Synergy installed.
          */
         var synergySupport = false
+
+        /**
+         * Whether to support device with armeabi-v7a architecture
+         */
+        var armSupport = true
+
+        /**
+         * Whether to support device with arm64-v8a architecture
+         */
+        var arm64Support = true
 
         /**
          * Combine all of the options that have been set and returns

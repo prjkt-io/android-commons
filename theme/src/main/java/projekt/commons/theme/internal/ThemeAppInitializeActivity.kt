@@ -15,6 +15,8 @@ import android.util.Log
 import projekt.andromeda.client.AndromedaClient
 import projekt.commons.buildtools.BuildTools
 import projekt.commons.shell.Shell
+import projekt.commons.theme.ThemeApp.EXTRA_ARM64_SUPPORT
+import projekt.commons.theme.ThemeApp.EXTRA_ARM_SUPPORT
 import projekt.commons.theme.ThemeApp.EXTRA_RESULT_CODE
 import projekt.commons.theme.ThemeApp.EXTRA_WITH_ANDROMEDA
 import projekt.commons.theme.ThemeApp.EXTRA_WITH_ANDROMEDA_SAMSUNG
@@ -24,6 +26,7 @@ import projekt.commons.theme.ThemeApp.EXTRA_WITH_SYNERGY
 import projekt.commons.theme.ThemeApp.EXTRA_WITH_SUBSTRATUM_SERVICE
 import projekt.commons.theme.ThemeApp.RESULT_ANDROMEDA_DENIED
 import projekt.commons.theme.ThemeApp.RESULT_ANDROMEDA_INACTIVE
+import projekt.commons.theme.ThemeApp.RESULT_ARCH_NOT_SUPPORTED
 import projekt.commons.theme.ThemeApp.RESULT_MAGISK_DISABLED
 import projekt.commons.theme.ThemeApp.RESULT_NO_SUPPORTED_BACKEND
 import projekt.commons.theme.ThemeApp.RESULT_PASS
@@ -44,7 +47,11 @@ internal class ThemeAppInitializeActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         // Try to extract binaries
-        BuildTools.setup(this)
+        val armSupported = intent.getBooleanExtra(EXTRA_ARM_SUPPORT, true)
+        val arm64Supported = intent.getBooleanExtra(EXTRA_ARM64_SUPPORT, true)
+        if (!BuildTools.setup(this, armSupported, arm64Supported)) {
+            finishWithIntentResult(RESULT_ARCH_NOT_SUPPORTED)
+        }
 
         // More preparation to use the backend
         val andromedaSamsungSupported = intent.getBooleanExtra(EXTRA_WITH_ANDROMEDA_SAMSUNG, false)
