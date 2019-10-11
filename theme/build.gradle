@@ -29,7 +29,7 @@ dependencies {
     implementation project(':shell')
 
     // APK Signer
-    implementation 'com.android.tools.build:apksig:3.5.0'
+    implementation 'com.android.tools.build:apksig:3.5.1'
 
     // Kotlin support
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
