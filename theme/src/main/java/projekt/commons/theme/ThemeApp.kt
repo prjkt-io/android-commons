@@ -25,6 +25,7 @@ import projekt.commons.theme.internal.ThemeAppInitializeActivity
 import projekt.commons.theme.internal.getCompatLongVersionCode
 import projekt.commons.theme.internal.isPackageInstalled
 import java.io.File
+import java.lang.Float.intBitsToFloat
 
 /**
  * Main class of this library.
@@ -224,7 +225,11 @@ object ThemeApp {
                             }
                             line.startsWith("meta-data") -> {
                                 val key = line.substringAfter("name='").substringBefore("'")
-                                val value = line.substringAfter("value='").substringBefore("'")
+                                var value = line.substringAfter("value='").substringBefore("'")
+                                // If hex, convert to float string
+                                if (value.startsWith("0x")) {
+                                    value = intBitsToFloat(value.substring(2).toLong(16).toInt()).toString()
+                                }
                                 metaData.putString(key, value)
                             }
                         }

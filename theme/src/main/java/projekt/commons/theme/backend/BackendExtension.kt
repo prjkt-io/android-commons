@@ -78,9 +78,7 @@ fun Backend.isOverlayNewest(name: String, timeStamp: Long): Boolean {
             // Metadata of an inactive overlay is weird string, so
             // let's try to convert it to float
             try {
-                val overlayTimestampFloat = java.lang.Float
-                        .intBitsToFloat(overlayTimestamp.substring(2).toLong(16).toInt())
-                if (overlayTimestampFloat != timeStamp.toFloat()) {
+                if (overlayTimestamp.toFloat() != timeStamp.toFloat()) {
                     return false
                 }
             } catch (ignored: Exception) {
