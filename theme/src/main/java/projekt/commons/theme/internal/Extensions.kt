@@ -6,6 +6,9 @@
 
 package projekt.commons.theme.internal
 
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -33,3 +36,6 @@ internal fun PackageInfo.getCompatLongVersionCode(): Long {
     @Suppress("DEPRECATION")
     return versionCode.toLong()
 }
+
+internal val Context.isApplicationDebugable: Boolean
+    get() = (packageManager.getApplicationInfo(packageName, 0).flags and FLAG_DEBUGGABLE) != 0

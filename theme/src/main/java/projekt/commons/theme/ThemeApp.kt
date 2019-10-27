@@ -11,8 +11,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import com.topjohnwu.superuser.Shell
 import projekt.commons.buildtools.BuildTools.getAapt
-import projekt.commons.shell.Shell.exec
 import projekt.commons.theme.backend.AndromedaBackend
 import projekt.commons.theme.backend.AndromedaSamsungBackend
 import projekt.commons.theme.backend.Backend
@@ -143,7 +143,7 @@ object ThemeApp {
     val magiskInstalledOverlay: List<OverlayPackageInfo>
         get() {
             val out = ArrayList<OverlayPackageInfo>()
-            exec("ls ${PieRootBackend.PIE_INSTALL_DIR}").output.forEach { line ->
+            Shell.su("ls ${PieRootBackend.PIE_INSTALL_DIR}").exec().out.forEach { line ->
                 getOverlayPackageInfo(line.substring(1, line.length - 4))?.let { out.add(it) }
             }
             return out
@@ -202,11 +202,11 @@ object ThemeApp {
                 // Always read directly from apk since we can't rely on the information
                 // given by package manager because it's often outdated when user update
                 // or reinstall the overlay
-                if (exec(("if [ -f ${INSTALL_PREFIX}$overlayPackageName.apk ]; then echo '0'; fi"))
-                                .output.isNotEmpty()) {
+                if (Shell.su(("if [ -f ${INSTALL_PREFIX}$overlayPackageName.apk ]; then echo '0'; fi"))
+                                .exec().out.isNotEmpty()) {
                     // Use AAPT to look inside the APK manually
-                    val commandOutput = exec(("${getAapt(ThemeApplication.instance).absolutePath} d " +
-                            "--include-meta-data badging $INSTALL_PREFIX$overlayPackageName.apk")).output
+                    val commandOutput = Shell.su(("${getAapt(ThemeApplication.instance).absolutePath} d " +
+                            "--include-meta-data badging $INSTALL_PREFIX$overlayPackageName.apk")).exec().out
                     var versionCode = 0.toLong()
                     var versionName = ""
                     val metaData = Bundle()

@@ -8,7 +8,7 @@ package projekt.commons.theme.backend
 
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
-import projekt.commons.shell.Shell.exec
+import com.topjohnwu.superuser.Shell
 import projekt.commons.theme.internal.isPackageInstalled
 import java.util.ArrayList
 import java.util.HashMap
@@ -20,7 +20,7 @@ import java.util.HashMap
 internal class RootBackend : Backend {
 
     private val overlayList: List<String>
-        get() = exec(OVERLAY_LIST).output
+        get() = Shell.su(OVERLAY_LIST).exec().out
 
     override val overlayState: Map<String, Int>
         get() {
@@ -83,7 +83,7 @@ internal class RootBackend : Backend {
     override fun installOverlay(paths: List<String>) {
         val commands = ArrayList<String>()
         paths.forEach { path -> commands.add("$PM_INSTALL $path") }
-        exec(commands.toTypedArray())
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {
@@ -92,7 +92,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        exec(commands.toTypedArray())
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun switchOverlay(packages: List<String>, state: Boolean, restartUi: Boolean) {
@@ -102,7 +102,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        exec(commands.toTypedArray())
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
@@ -114,7 +114,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        exec(commands.toTypedArray())
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun getEnabledOverlayWithTarget(targetPackage: String): List<String> {
@@ -141,7 +141,7 @@ internal class RootBackend : Backend {
     }
 
     override fun restartSystemUi() {
-        exec(KILL_SYSTEMUI)
+        Shell.su(KILL_SYSTEMUI).submit()
     }
 
     override fun applyFonts(themePid: String, name: String) {}

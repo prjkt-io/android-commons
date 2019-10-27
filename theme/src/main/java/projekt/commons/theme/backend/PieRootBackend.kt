@@ -7,9 +7,7 @@
 package projekt.commons.theme.backend
 
 import android.provider.Settings
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import projekt.commons.shell.Shell.exec
+import com.topjohnwu.superuser.Shell
 import projekt.commons.theme.BuildConfig
 import projekt.commons.theme.ThemeApplication
 import projekt.commons.theme.internal.getApplicationLabel
@@ -24,15 +22,15 @@ import java.util.HashMap
 internal class PieRootBackend : Backend {
 
     private val overlayList: List<String>
-        get() = exec(OVERLAY_LIST).output
+        get() = Shell.su(OVERLAY_LIST).exec().out
 
     private val magiskModuleInstalled: Boolean
-        get() = exec("test -d $MAGISK_MODULE_DIR || echo '0'").output.isEmpty()
+        get() = Shell.su("test -d $MAGISK_MODULE_DIR || echo '0'").exec().out.isEmpty()
 
     internal val magiskModuleActivated: Boolean
         get() {
             if (magiskModuleInstalled) {
-                return exec("test -f $MAGISK_MODULE_DIR/update || echo '0'").output.isNotEmpty()
+                return Shell.su("test -f $MAGISK_MODULE_DIR/update || echo '0'").exec().out.isNotEmpty()
             }
             return false
         }
@@ -40,7 +38,7 @@ internal class PieRootBackend : Backend {
     internal val magiskModuleDisabled: Boolean
         get() {
             if (magiskModuleInstalled) {
-                return exec("test -f $MAGISK_MODULE_DIR/disable || echo '0'").output.isNullOrEmpty()
+                return Shell.su("test -f $MAGISK_MODULE_DIR/disable || echo '0'").exec().out.isNullOrEmpty()
             }
             return false
         }
@@ -123,7 +121,7 @@ internal class PieRootBackend : Backend {
         }
         set(value) {
             val newValue = if (value) samsungExposurePrefValue else null
-            exec("settings put system $samsungExposurePrefKey $newValue")
+            Shell.su("settings put system $samsungExposurePrefKey $newValue").submit()
         }
 
     override fun installOverlay(paths: List<String>) {
@@ -134,9 +132,7 @@ internal class PieRootBackend : Backend {
             commands.add("$MOVE_OVERLAY ${paths[i]} $INSTALL_PREFIX${split[split.size - 1]}")
             commands.add("chmod 644 $INSTALL_PREFIX${split[split.size - 1]}")
         }
-        GlobalScope.launch {
-            exec(commands.toTypedArray())
-        }
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {
@@ -148,9 +144,7 @@ internal class PieRootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        GlobalScope.launch {
-            exec(commands.toTypedArray())
-        }
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun switchOverlay(packages: List<String>, state: Boolean, restartUi: Boolean) {
@@ -163,7 +157,7 @@ internal class PieRootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        exec(commands.toTypedArray())
+        Shell.su(*commands.toTypedArray()).submit()
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
@@ -175,7 +169,7 @@ internal class PieRootBackend : Backend {
             if (restartUi) {
                 commands.add(KILL_SYSTEMUI)
             }
-            exec(commands.toTypedArray())
+            Shell.su(*commands.toTypedArray()).submit()
         }
     }
 
@@ -203,7 +197,7 @@ internal class PieRootBackend : Backend {
     }
 
     override fun restartSystemUi() {
-        exec(KILL_SYSTEMUI)
+        Shell.su(KILL_SYSTEMUI).submit()
     }
 
     override fun applyFonts(themePid: String, name: String) {}
@@ -225,19 +219,19 @@ internal class PieRootBackend : Backend {
                     " > $MAGISK_MODULE_DIR/module.prop; " +
                     "touch $MAGISK_MODULE_DIR/auto_mount; " +
                     "mkdir -p $PIE_INSTALL_DIR; "
-            exec(command)
+            Shell.su(command).exec()
             return true
         }
         return false
     }
 
     internal fun checkMagisk(): Boolean {
-        return exec("su -v").output.joinToString().contains("magisk", true) &&
+        return Shell.su("su -v").exec().out.joinToString().contains("magisk", true) &&
                 getMagiskVersion() >= MIN_MAGISK_VERSION
     }
 
     private fun getMagiskVersion(): Int {
-        val output = exec("su -V").output
+        val output = Shell.su("su -V").exec().out
         if (output.size == 1) { // Strict rule rules
             try {
                 return output[0].toInt()

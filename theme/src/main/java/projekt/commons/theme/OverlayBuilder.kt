@@ -10,9 +10,9 @@ import android.os.Build
 import android.util.ArrayMap
 import androidx.preference.PreferenceManager
 import com.android.apksig.ApkSigner
+import com.topjohnwu.superuser.Shell
 import projekt.commons.buildtools.BuildTools.getAapt
 import projekt.commons.buildtools.BuildTools.getZipalign
-import projekt.commons.shell.Shell
 import projekt.commons.theme.ThemeApp.OVERLAY_PERMISSION
 import projekt.commons.theme.ThemeApp.SAMSUNG_OVERLAY_PERMISSION
 import projekt.commons.theme.internal.METADATA_INSTALL_TIMESTAMP
@@ -266,8 +266,8 @@ class OverlayBuilder(
         }
 
         // Zipalign the compiled overlay
-        Shell.exec("${getZipalign(ThemeApplication.instance).absolutePath} 4 " +
-                "${unsigned.absolutePath} ${aligned.absolutePath}")
+        Shell.sh("${getZipalign(ThemeApplication.instance).absolutePath} 4 " +
+                "${unsigned.absolutePath} ${aligned.absolutePath}").exec()
         if (!aligned.isFile) {
             return Result.Failure("Failed to zipalign overlay")
         }

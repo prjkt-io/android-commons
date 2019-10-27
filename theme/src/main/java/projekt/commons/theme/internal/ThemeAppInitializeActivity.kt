@@ -12,9 +12,9 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import com.topjohnwu.superuser.Shell
 import projekt.andromeda.client.AndromedaClient
 import projekt.commons.buildtools.BuildTools
-import projekt.commons.shell.Shell
 import projekt.commons.theme.ThemeApp.EXTRA_ARM64_SUPPORT
 import projekt.commons.theme.ThemeApp.EXTRA_ARM_SUPPORT
 import projekt.commons.theme.ThemeApp.EXTRA_RESULT_CODE

@@ -9,9 +9,9 @@ package projekt.commons.theme
 import android.app.Application
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
+import com.topjohnwu.superuser.Shell
 import projekt.andromeda.client.AndromedaClient
 import projekt.andromeda.client.AndromedaClient.ACCESS_PERMISSION
-import projekt.commons.shell.Shell
 import projekt.substratum.platform.SubstratumServiceBridge
 import projekt.commons.theme.ThemeApp.isSamsung
 import projekt.commons.theme.ThemeApp.isSynergyInstalled
@@ -22,6 +22,7 @@ import projekt.commons.theme.backend.PieRootBackend
 import projekt.commons.theme.backend.RootBackend
 import projekt.commons.theme.backend.SynergyBackend
 import projekt.commons.theme.backend.SubstratumServiceBackend
+import projekt.commons.theme.internal.isApplicationDebugable
 import java.io.File
 
 /**
@@ -64,18 +65,50 @@ open class ThemeApplication : Application() {
             // TODO: Choose used backend if multiple supported
             backend = if (andromedaSamsungSupported && isSamsung && !isAtleastPie && isAndromeda &&
                     AndromedaClient.initialize(instance)) {
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 AndromedaSamsungBackend()
             } else if (andromedaSupported && !isAtleastPie && isAndromeda && AndromedaClient.initialize(instance)) {
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 AndromedaBackend()
             } else if (substratumServiceSupported && isSubstratumService) {
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 SubstratumServiceBackend()
             } else if (pieRootSupported && isRooted && isAtleastPie) {
-                Shell.reinitWithRoot()
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR
+
+                )
                 PieRootBackend()
             } else if (rootSupported && isRooted && !isAtleastPie) {
-                Shell.reinitWithRoot()
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR
+
+                )
                 RootBackend()
             } else if (synergySupported && isSynergyInstalled) {
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 SynergyBackend()
             } else {
                 return false
@@ -103,23 +136,57 @@ open class ThemeApplication : Application() {
                 if (instance.checkSelfPermission(ACCESS_PERMISSION) != PERMISSION_GRANTED) {
                     return false
                 }
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 AndromedaSamsungBackend()
             } else if (andromedaSupported && !isAtleastPie && isAndromeda &&
                     AndromedaClient.initialize(instance)) {
                 if (instance.checkSelfPermission(ACCESS_PERMISSION) != PERMISSION_GRANTED) {
                     return false
                 }
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 AndromedaBackend()
             } else if (substratumServiceSupported && isSubstratumService) {
                 // Should've check for permissive settings too but we already catch everything so
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 SubstratumServiceBackend()
             } else if (pieRootSupported && isRooted && isAtleastPie) {
                 // Root will ask permission if needed
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR
+
+                )
                 PieRootBackend()
             } else if (rootSupported && isRooted  && !isAtleastPie) {
                 // Root will ask permission if needed
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR
+
+                )
                 RootBackend()
             } else if (synergySupported && isSynergyInstalled) {
+                Shell.Config.setFlags(
+                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
+                                Shell.FLAG_REDIRECT_STDERR or
+                                Shell.FLAG_NON_ROOT_SHELL
+
+                )
                 SynergyBackend()
             } else {
                 return false
