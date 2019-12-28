@@ -74,7 +74,7 @@ object Shell {
             }
             while(true) {
                 val line = outputReader.readLine()
-                if (line == callback) {
+                if (line == callback || line == null) {
                     break
                 } else {
                     output.add(line)
