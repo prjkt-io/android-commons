@@ -222,7 +222,9 @@ class OverlayBuilder(
             command.append("-I /system/framework/framework-res.apk ")
             if (!doLegacyCompile) {
                 extraBasePackagePath.forEach { path ->
-                    command.append("-I ").append(path).append(" ")
+                    if (File(path).exists()) {
+                        command.append("-I ").append(path).append(" ")
+                    }
                 }
             }
 
