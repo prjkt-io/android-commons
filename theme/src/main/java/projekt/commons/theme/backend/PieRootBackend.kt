@@ -242,13 +242,13 @@ internal class PieRootBackend : Backend {
     }
 
     companion object {
-        private const val MIN_MAGISK_VERSION = 18000
+        private const val MIN_MAGISK_VERSION = 19000
 
         private const val STATE_MISSING_TARGET = 0
         private const val STATE_DISABLED = 2
         private const val STATE_ENABLED = 3
 
-        private val MAGISK_MODULE_DIR = "${getMagiskDirectory()}/img/${ThemeApplication.instance.packageName}.helper/"
+        private val MAGISK_MODULE_DIR = "${getMagiskDirectory()}/${ThemeApplication.instance.packageName}.helper/"
         internal val PIE_INSTALL_DIR = MAGISK_MODULE_DIR + "system/app/"
 
         private const val OVERLAY_ENABLE = "cmd overlay enable"
@@ -264,8 +264,6 @@ internal class PieRootBackend : Backend {
         private const val DISABLED_PREFIX = "[ ]"
         private const val MISSING_TARGET_PREFIX = "---"
 
-        private fun getMagiskDirectory(): String {
-            return "/sbin/.magisk"
-        }
+        private fun getMagiskDirectory(): String = "/data/adb/modules"
     }
 }
