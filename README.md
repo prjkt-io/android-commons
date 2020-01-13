@@ -22,3 +22,10 @@ dependencies {
     implementation 'com.github.prjkt-io.android-commons:theme:[latest_version]'
 }
 ```
+
+# Attention
+
+If your app depends on Build Tools or Theme app backend and published using App Bundles (AAB), you need to add this to your project's `gradle.properties`
+```
+android.bundle.enableUncompressedNativeLibs=false
+``` 
