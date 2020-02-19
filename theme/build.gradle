@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+apply from: '../versions.gradle'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka-android'
@@ -13,8 +14,15 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 1
-        versionName commons_version
+        versionCode versions.libraryVersionCode
+        versionName versions.libraryVersion
+    }
+    compileSdkVersion versions.compileSdk
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode versions.libraryVersionCode
+        versionName versions.libraryVersion
     }
 }
 
@@ -34,13 +42,13 @@ dependencies {
     implementation 'com.android.tools.build:apksig:3.5.3'
 
     // Kotlin support
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutines_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutines_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinVersion}"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutinesVersion}"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutinesVersion}"
 
     // AndroidX Core for Synergy things
-    implementation "androidx.core:core:1.1.0"
-    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "androidx.core:core:1.2.0"
+    implementation "androidx.core:core-ktx:1.2.0"
     implementation "androidx.preference:preference:1.1.0"
 }
 

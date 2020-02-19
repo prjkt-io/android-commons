@@ -4,22 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+apply from: '../versions.gradle'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka-android'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion versions.compileSdk
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 29
-        versionCode 1
-        versionName commons_version
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode versions.libraryVersionCode
+        versionName versions.libraryVersion
     }
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinVersion}"
     implementation project(':shell')
 }
 
