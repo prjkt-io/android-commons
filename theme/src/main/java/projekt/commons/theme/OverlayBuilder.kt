@@ -16,6 +16,7 @@ import projekt.commons.buildtools.BuildTools.getZipalign
 import projekt.commons.theme.ThemeApp.OVERLAY_PERMISSION
 import projekt.commons.theme.ThemeApp.SAMSUNG_OVERLAY_PERMISSION
 import projekt.commons.theme.internal.METADATA_INSTALL_TIMESTAMP
+import projekt.commons.theme.internal.SPLIT_DENSITY_IDENTIFIERS
 import java.io.*
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -45,6 +46,7 @@ class OverlayBuilder(
     private val versionName: String? = null,
     private val label: String? = null,
     private val metaData: ArrayMap<String, String>? = null,
+    private val buildSplitApk: Boolean = true,
     private val outDir: File = File(ThemeApplication.instance.externalCacheDir, "overlays")
 ) {
 
@@ -100,17 +102,30 @@ class OverlayBuilder(
      * @see Result
      */
     fun exec(): Result {
+        if (resourceDirs.isEmpty()) {
+            return Result.Failure("Resource directory cannot be empty!")
+        }
+        if (!outDir.isDirectory) {
+            if (!outDir.mkdirs()) {
+                return Result.Failure("Failed to create overlay cache directory")
+            }
+        }
+
         workDir.mkdirs()
-        generateManifest()
-        val result = compileOverlay()
+        prepareResources()
+
+        val result: Result = Result.Failure("")
+        workDir.listFiles { file -> file.isDirectory }?.forEach {
+            compileOverlay(it)
+        }
         workDir.deleteRecursively()
         return result
     }
 
     /**
-     * Generate AndroidManifest.xml to workDir root.
+     * Generate base APK's AndroidManifest.xml to workDir root.
      */
-    private fun generateManifest() {
+    private fun generateBaseManifest(): String {
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()
 
         // Root manifest element
@@ -150,6 +165,7 @@ class OverlayBuilder(
         val applicationElement = document.createElement("application")
         applicationElement.setAttribute("android:allowBackup", "false")
         applicationElement.setAttribute("android:hasCode", "false")
+        applicationElement.setAttribute("android:isSplitRequired", "$buildSplitApk")
         label?.let {
             applicationElement.setAttribute("android:label", it)
         }
@@ -177,43 +193,112 @@ class OverlayBuilder(
         transformer.transform(DOMSource(document), StreamResult(outWriter))
 
         outWriter.use { sw ->
-            FileWriter(File(workDir, "AndroidManifest.xml")).use { fw ->
-                fw.write(sw.toString())
+            return sw.toString()
+        }
+    }
+
+    /**
+     * Generate split APK's AndroidManifest.xml.
+     */
+    private fun generateSplitManifest(splitConfig: String): String {
+        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()
+
+        // Root manifest element
+        val rootElement = document.createElement("manifest")
+        rootElement.setAttribute("xmlns:android", "http://schemas.android.com/apk/res/android")
+        rootElement.setAttribute("package", packageName)
+        versionCode?.let {
+            rootElement.setAttribute("android:versionCode", it.toString())
+        }
+        versionName?.let {
+            rootElement.setAttribute("android:versionName", it)
+        }
+        rootElement.setAttribute("configForSplit", "")
+        rootElement.setAttribute("split", "config.$splitConfig")
+
+        // Application attributes
+        val applicationElement = document.createElement("application")
+        applicationElement.setAttribute("android:hasCode", "false")
+
+        // Insert all child to parent
+        rootElement.appendChild(applicationElement)
+        document.appendChild(rootElement)
+
+        // Finally get the manifest file
+        val transformer = TransformerFactory.newInstance().newTransformer()
+        val outWriter = StringWriter()
+        transformer.transform(DOMSource(document), StreamResult(outWriter))
+
+        outWriter.use { sw ->
+            return sw.toString()
+        }
+    }
+
+    private fun prepareResources() {
+        var mainDir: File? = null
+        resourceDirs.forEachIndexed { i, dir ->
+            if (i < resourceDirs.lastIndex) {
+                File(dir).apply {
+                    copyRecursively(File(resourceDirs[i + 1]), overwrite = true)
+                    deleteRecursively()
+                }
+            } else {
+                mainDir = File(dir)
+            }
+        }
+
+        mainDir?.apply {
+            // Prepare split resources
+            listFiles()?.forEach { dir ->
+                if (dir.name.startsWith("drawable-")) {
+                    val identifier = dir.name.substringAfter("drawable-")
+                    if (SPLIT_DENSITY_IDENTIFIERS.contains(identifier)) {
+                        val splitDir = File(workDir, "$packageName.split_config.$identifier")
+                        dir.copyRecursively(File(splitDir, dir.name))
+                        dir.deleteRecursively()
+                        FileWriter(File(workDir, "${splitDir.name}.AndroidManifest.xml")).use { fw ->
+                            fw.write(generateSplitManifest(identifier))
+                        }
+                    }
+                } else if (dir.name.startsWith("values-")) {
+                    // TODO: Split for values
+                }
+            }
+
+            // Prepare base resources
+            copyRecursively(File(workDir, packageName))
+            deleteRecursively()
+            FileWriter(File(workDir, "$packageName.AndroidManifest.xml")).use { fw ->
+                fw.write(generateBaseManifest())
             }
         }
     }
 
-    private fun compileOverlay(): Result {
-        val unsigned = File(outDir, "$packageName-unsigned.apk")
-        val aligned = File(outDir, "$packageName-unsigned-aligned.apk")
-        val signed = File(outDir, "$packageName.apk")
-
-        if (!outDir.isDirectory) {
-            if (!outDir.mkdirs()) {
-                return Result.Failure("Failed to create overlay cache directory")
-            }
-        }
+    private fun compileOverlay(resDir: File): Result {
+        val unsigned = File(outDir, "${resDir.name}-unsigned.apk")
+        val aligned = File(outDir, "${resDir.name}-unsigned-aligned.apk")
+        val signed = File(outDir, "${resDir.name}.apk")
 
         // Compile unsigned APK
         var doLegacyCompile = false
+        val tempManifest = File(resDir.parent, "AndroidManifest.xml")
+        File(resDir.parent, "${resDir.name}.AndroidManifest.xml").apply {
+            copyTo(tempManifest)
+            delete()
+        }
         do {
             val command = StringBuilder()
             // Make sure this will call AAPT duh
             command.append(getAapt(ThemeApplication.instance).absolutePath).append(" p ")
 
             // The manifest
-            command.append("-M ").append(workDir.absolutePath).append("/AndroidManifest.xml ")
+            command.append("-M ").append(tempManifest).append(" ")
 
             // Add resource directories
-            if (resourceDirs.isEmpty()) {
-                return Result.Failure("Resource directory cannot be empty!")
-            }
-            resourceDirs.forEach { dir ->
-                command.append("-S ").append(dir).append(" ")
-            }
+            command.append("-S ").append(resDir.absolutePath).append(" ")
 
-            // Add asset directory if set
-            if (!assetDir.isNullOrEmpty()) {
+            // Add asset directory to base package if set
+            if (resDir.name == packageName && !assetDir.isNullOrEmpty()) {
                 command.append("-A ").append(assetDir).append(" ")
             }
 
@@ -301,6 +386,7 @@ class OverlayBuilder(
         }
 
         // Delete unsigned APK
+        tempManifest.delete()
         unsigned.delete()
         aligned.delete()
 
