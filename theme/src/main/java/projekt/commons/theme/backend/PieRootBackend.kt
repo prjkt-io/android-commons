@@ -226,12 +226,12 @@ internal class PieRootBackend : Backend {
     }
 
     internal fun checkMagisk(): Boolean {
-        return Shell.su("su -v").exec().out.joinToString().contains("magisk", true) &&
+        return Shell.sh("su -v").exec().out.joinToString().contains("magisk", true) &&
                 getMagiskVersion() >= MIN_MAGISK_VERSION
     }
 
     private fun getMagiskVersion(): Int {
-        val output = Shell.su("su -V").exec().out
+        val output = Shell.sh("su -V").exec().out
         if (output.size == 1) { // Strict rule rules
             try {
                 return output[0].toInt()
