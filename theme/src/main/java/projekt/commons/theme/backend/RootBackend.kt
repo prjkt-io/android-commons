@@ -106,15 +106,16 @@ internal class RootBackend : Backend {
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
-        val n = packages.size
-        val commands = ArrayList<String>()
-        for (i in 0 until n - 1) {
-            commands.add(OVERLAY_SET_PRIORITY + " " + packages[i + 1] + " " + packages[i])
+        with(packages) {
+            val commands = ArrayList<String>()
+            for (i in 0 until size - 1) {
+                commands.add(OVERLAY_SET_PRIORITY + " " + get(i) + " " + get(i + 1))
+            }
+            if (restartUi) {
+                commands.add(KILL_SYSTEMUI)
+            }
+            Shell.su(*commands.toTypedArray()).exec()
         }
-        if (restartUi) {
-            commands.add(KILL_SYSTEMUI)
-        }
-        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun getEnabledOverlayWithTarget(targetPackage: String): List<String> {
