@@ -83,7 +83,7 @@ internal class RootBackend : Backend {
     override fun installOverlay(paths: List<String>) {
         val commands = ArrayList<String>()
         paths.forEach { path -> commands.add("$PM_INSTALL $path") }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {
@@ -92,7 +92,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun switchOverlay(packages: List<String>, state: Boolean, restartUi: Boolean) {
@@ -102,7 +102,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
@@ -114,7 +114,7 @@ internal class RootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun getEnabledOverlayWithTarget(targetPackage: String): List<String> {

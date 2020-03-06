@@ -121,7 +121,7 @@ internal class PieRootBackend : Backend {
         }
         set(value) {
             val newValue = if (value) samsungExposurePrefValue else null
-            Shell.su("settings put system $samsungExposurePrefKey $newValue").submit()
+            Shell.su("settings put system $samsungExposurePrefKey $newValue").exec()
         }
 
     override fun installOverlay(paths: List<String>) {
@@ -132,7 +132,7 @@ internal class PieRootBackend : Backend {
             commands.add("$MOVE_OVERLAY ${paths[i]} $INSTALL_PREFIX${split[split.size - 1]}")
             commands.add("chmod 644 $INSTALL_PREFIX${split[split.size - 1]}")
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {
@@ -144,7 +144,7 @@ internal class PieRootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun switchOverlay(packages: List<String>, state: Boolean, restartUi: Boolean) {
@@ -157,7 +157,7 @@ internal class PieRootBackend : Backend {
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
         }
-        Shell.su(*commands.toTypedArray()).submit()
+        Shell.su(*commands.toTypedArray()).exec()
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
@@ -169,7 +169,7 @@ internal class PieRootBackend : Backend {
             if (restartUi) {
                 commands.add(KILL_SYSTEMUI)
             }
-            Shell.su(*commands.toTypedArray()).submit()
+            Shell.su(*commands.toTypedArray()).exec()
         }
     }
 
