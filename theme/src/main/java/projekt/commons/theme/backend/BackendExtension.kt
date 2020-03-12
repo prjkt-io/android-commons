@@ -92,7 +92,7 @@ fun Backend.isOverlayNewest(name: String, timeStamp: Long): Boolean {
 private fun shouldRestartSystemUi(overlays: List<String>): Boolean {
     if (!ThemeApp.isSubstratumService) {
         for (overlay in overlays) {
-            if (overlay.startsWith("com.android.systemui")) {
+            if (overlay.startsWith("com.android.systemui") || overlay.startsWith("android")) {
                 return true
             }
         }
