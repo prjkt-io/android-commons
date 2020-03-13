@@ -129,10 +129,12 @@ class OverlayBuilder(
         overlayElement.setAttribute("android:targetPackage", targetPackageName)
         rootElement.appendChild(overlayElement)
 
-        // Q overlays needs to "target" Q
-        val usesSdkElement = document.createElement("uses-sdk")
-        usesSdkElement.setAttribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
-        rootElement.appendChild(usesSdkElement)
+        // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
+            val usesSdkElement = document.createElement("uses-sdk")
+            usesSdkElement.setAttribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
+            rootElement.appendChild(usesSdkElement)
+        }
 
         // Proper permission for Samsung devices to utilize the overlay
         if (ThemeApp.isSamsung) {
