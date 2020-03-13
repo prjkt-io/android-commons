@@ -86,6 +86,8 @@ internal class ThemeAppInitializeActivity : Activity() {
                 is RootBackend -> {
                     Log.d(TAG, "Prepare for using Root backend")
                     // Request and check root permission
+                    // Close cached shell to refresh root access status
+                    Shell.getShell().close()
                     if (Shell.rootAccess()) {
                         finishPassed()
                     } else {
@@ -96,6 +98,8 @@ internal class ThemeAppInitializeActivity : Activity() {
                     Log.d(TAG, "Prepare for using Android P backend")
                     // Request and check root permission
                     if (backend.checkMagisk()) {
+                        // Close cached shell to refresh root access status
+                        Shell.getShell().close()
                         if (Shell.rootAccess()) {
                             if (backend.magiskModuleDisabled) {
                                 finishWithIntentResult(RESULT_MAGISK_DISABLED)
