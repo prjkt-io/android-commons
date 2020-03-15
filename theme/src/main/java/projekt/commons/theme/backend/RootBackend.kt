@@ -25,7 +25,7 @@ internal class RootBackend : Backend {
     override val overlayState: Map<String, Int>
         get() {
             val out = HashMap<String, Int>()
-            val outList = overlayList
+            val outList = overlayList.reversed()
             for (line in outList) {
                 if (line.startsWith(ENABLED_PREFIX)) {
                     if (line.substring(4).isPackageInstalled()) {
@@ -111,6 +111,8 @@ internal class RootBackend : Backend {
             for (i in 0 until size - 1) {
                 commands.add(OVERLAY_SET_PRIORITY + " " + get(i) + " " + get(i + 1))
             }
+            commands.add(OVERLAY_SET_PRIORITY + " " + last() + " highest")
+            commands.reverse()
             if (restartUi) {
                 commands.add(KILL_SYSTEMUI)
             }
@@ -134,11 +136,11 @@ internal class RootBackend : Backend {
                     }
                 } else if (!line.startsWith(DISABLED_PREFIX) && !line.startsWith(MISSING_TARGET_PREFIX)) {
                     // Done listing overlays, return value
-                    return out
+                    return out.reversed()
                 }
             }
         }
-        return out
+        return out.reversed()
     }
 
     override fun restartSystemUi() {

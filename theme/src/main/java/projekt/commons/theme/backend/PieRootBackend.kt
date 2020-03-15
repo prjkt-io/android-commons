@@ -161,11 +161,13 @@ internal class PieRootBackend : Backend {
     }
 
     override fun setPriority(packages: List<String>, restartUi: Boolean) {
-        with(packages.reversed()) {
+        with(packages) {
             val commands = ArrayList<String>()
             for (i in 0 until size - 1) {
                 commands.add(OVERLAY_SET_PRIORITY + " " + get(i) + " " + get(i + 1))
             }
+            commands.add(OVERLAY_SET_PRIORITY + " " + last() + " highest")
+            commands.reverse()
             if (restartUi) {
                 commands.add(KILL_SYSTEMUI)
             }
