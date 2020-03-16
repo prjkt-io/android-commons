@@ -140,8 +140,12 @@ object ThemeApp {
     val magiskInstalledOverlay: List<OverlayPackageInfo>
         get() {
             val out = ArrayList<OverlayPackageInfo>()
-            Shell.su("ls ${PieRootBackend.PIE_INSTALL_DIR}").exec().out.forEach { line ->
-                getOverlayPackageInfo(line.substring(1, line.length - 4))?.let { out.add(it) }
+            Shell.su("ls ${PieRootBackend.PIE_INSTALL_DIR}").exec().let { result ->
+                if (result.isSuccess) {
+                    result.out.forEach { line ->
+                        getOverlayPackageInfo(line.substring(1, line.length - 4))?.let { out.add(it) }
+                    }
+                }
             }
             return out
         }
