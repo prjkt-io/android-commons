@@ -10,19 +10,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka-android'
 
 android {
-    compileSdkVersion 29
-    defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 29
-        versionCode versions.libraryVersionCode
-        versionName versions.libraryVersion
-    }
     compileSdkVersion versions.compileSdk
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
         versionCode versions.libraryVersionCode
         versionName versions.libraryVersion
+        consumerProguardFiles 'proguard-rules.pro'
     }
 }
 
@@ -39,7 +33,7 @@ dependencies {
     implementation "com.github.topjohnwu.libsu:core:2.5.1"
 
     // APK Signer
-    implementation 'com.android.tools.build:apksig:3.5.3'
+    implementation 'com.android.tools.build:apksig:3.6.2'
 
     // Kotlin support
     api "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinVersion}"
