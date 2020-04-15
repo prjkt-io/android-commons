@@ -198,7 +198,7 @@ class OverlayBuilder(
 
         // Compile unsigned APK
         var doLegacyCompile = false
-        do {
+        loop@ do {
             val command = StringBuilder()
             // Make sure this will call AAPT duh
             command.append(getAapt(ThemeApplication.instance).absolutePath).append(" p ")
@@ -259,7 +259,10 @@ class OverlayBuilder(
                 }
             }
             process.destroy()
-            if (!doLegacyCompile && error.isNotEmpty()) {
+            if (doLegacyCompile) {
+                break@loop
+            }
+            if (error.isNotEmpty()) {
                 return Result.Failure(error)
             }
         } while (doLegacyCompile)
