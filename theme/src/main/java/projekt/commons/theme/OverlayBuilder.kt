@@ -8,6 +8,7 @@ package projekt.commons.theme
 
 import android.os.Build
 import android.util.ArrayMap
+import android.util.Xml
 import androidx.preference.PreferenceManager
 import com.android.apksig.ApkSigner
 import com.topjohnwu.superuser.Shell
@@ -16,15 +17,14 @@ import projekt.commons.buildtools.BuildTools.getZipalign
 import projekt.commons.theme.ThemeApp.OVERLAY_PERMISSION
 import projekt.commons.theme.ThemeApp.SAMSUNG_OVERLAY_PERMISSION
 import projekt.commons.theme.internal.METADATA_INSTALL_TIMESTAMP
+import projekt.commons.theme.internal.attribute
+import projekt.commons.theme.internal.document
+import projekt.commons.theme.internal.element
 import java.io.*
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import java.util.ArrayList
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
 
 /**
  * A class for building overlays.
@@ -111,77 +111,70 @@ class OverlayBuilder(
      * Generate AndroidManifest.xml to workDir root.
      */
     private fun generateManifest() {
-        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()
+        val serializer = Xml.newSerializer()
+        val str = serializer.document {
+            // Root manifest element
+            element("manifest") {
+                attribute("xmlns:android", "http://schemas.android.com/apk/res/android")
+                attribute("package", packageName)
+                versionCode?.let {
+                    attribute("android:versionCode", it.toString())
+                }
+                versionName?.let {
+                    attribute("android:versionName", it)
+                }
 
-        // Root manifest element
-        val rootElement = document.createElement("manifest")
-        rootElement.setAttribute("xmlns:android", "http://schemas.android.com/apk/res/android")
-        rootElement.setAttribute("package", packageName)
-        versionCode?.let {
-            rootElement.setAttribute("android:versionCode", it.toString())
-        }
-        versionName?.let {
-            rootElement.setAttribute("android:versionName", it)
-        }
+                // Overlay package attributes
+                element("overlay") {
+                    attribute("android:targetPackage", targetPackageName)
+                }
 
-        // Overlay package attributes
-        val overlayElement = document.createElement("overlay")
-        overlayElement.setAttribute("android:targetPackage", targetPackageName)
-        rootElement.appendChild(overlayElement)
+                // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
+                    element("uses-sdk") {
+                        attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
+                    }
+                }
 
-        // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
-            val usesSdkElement = document.createElement("uses-sdk")
-            usesSdkElement.setAttribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
-            rootElement.appendChild(usesSdkElement)
-        }
+                // Proper permission for Samsung devices to utilize the overlay
+                if (ThemeApp.isSamsung) {
+                    element("uses-permission") {
+                        attribute("android:name", SAMSUNG_OVERLAY_PERMISSION)
+                    }
+                }
 
-        // Proper permission for Samsung devices to utilize the overlay
-        if (ThemeApp.isSamsung) {
-            val usesPermissionSamsung = document.createElement("uses-permission")
-            usesPermissionSamsung.setAttribute("android:name", SAMSUNG_OVERLAY_PERMISSION)
-            rootElement.appendChild(usesPermissionSamsung)
-        }
+                // "permission" for easy overlay listing
+                element("uses-permission") {
+                    attribute("android:name", OVERLAY_PERMISSION)
+                }
 
-        // "permission" for easy overlay listing
-        val permission = document.createElement("uses-permission")
-        permission.setAttribute("android:name", OVERLAY_PERMISSION)
-        rootElement.appendChild(permission)
+                // Application attributes (for metadata)
+                element("application") {
+                    attribute("android:allowBackup", "false")
+                    attribute("android:hasCode", "false")
+                    label?.let {
+                        attribute("android:label", it)
+                    }
 
-        // Application attributes (for metadata)
-        val applicationElement = document.createElement("application")
-        applicationElement.setAttribute("android:allowBackup", "false")
-        applicationElement.setAttribute("android:hasCode", "false")
-        label?.let {
-            applicationElement.setAttribute("android:label", it)
-        }
+                    // Metadata
+                    metaData?.forEach { name, value ->
+                        element("meta-data") {
+                            attribute("android:name", name)
+                            attribute("android:value", value)
+                        }
+                    }
 
-        // Metadata
-        metaData?.forEach { name, value ->
-            val child = document.createElement("meta-data")
-            child.setAttribute("android:name", name)
-            child.setAttribute("android:value", value)
-            applicationElement.appendChild(child)
-        }
-
-        val installTimestampElement = document.createElement("meta-data")
-        installTimestampElement.setAttribute("android:name", METADATA_INSTALL_TIMESTAMP)
-        installTimestampElement.setAttribute("android:value", timestamp.toString())
-        applicationElement.appendChild(installTimestampElement)
-
-        // Insert all child to parent
-        rootElement.appendChild(applicationElement)
-        document.appendChild(rootElement)
-
-        // Finally get the manifest file
-        val transformer = TransformerFactory.newInstance().newTransformer()
-        val outWriter = StringWriter()
-        transformer.transform(DOMSource(document), StreamResult(outWriter))
-
-        outWriter.use { sw ->
-            FileWriter(File(workDir, "AndroidManifest.xml")).use { fw ->
-                fw.write(sw.toString())
+                    // Install timestamp
+                    element("meta-data") {
+                        attribute("android:name", METADATA_INSTALL_TIMESTAMP)
+                        attribute("android:value", timestamp.toString())
+                    }
+                }
             }
+        }
+
+        FileWriter(File(workDir, "AndroidManifest.xml")).use { fw ->
+            fw.write(str)
         }
     }
 
