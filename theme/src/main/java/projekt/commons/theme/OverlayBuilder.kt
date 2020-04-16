@@ -130,7 +130,7 @@ class OverlayBuilder(
                 }
 
                 // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
-                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
                     element("uses-sdk") {
                         attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
                     }
