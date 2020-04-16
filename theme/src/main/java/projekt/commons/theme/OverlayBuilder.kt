@@ -136,8 +136,8 @@ class OverlayBuilder(
                     }
                 }
 
-                // Proper permission for Samsung devices to utilize the overlay
-                if (ThemeApp.isSamsung) {
+                // Proper permission for Synergy devices to utilize the overlay
+                if (ThemeApp.isSynergy) {
                     element("uses-permission") {
                         attribute("android:name", SAMSUNG_OVERLAY_PERMISSION)
                     }
