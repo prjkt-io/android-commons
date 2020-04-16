@@ -129,15 +129,15 @@ class OverlayBuilder(
                     attribute("android:targetPackage", targetPackageName)
                 }
 
-                // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ThemeApp.isSynergy) {
-                    element("uses-sdk") {
-                        attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
-                    }
-                }
-
-                // Proper permission for Synergy devices to utilize the overlay
                 if (ThemeApp.isSynergy) {
+                    // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        element("uses-sdk") {
+                            attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
+                        }
+                    }
+
+                    // Proper permission for Synergy devices to utilize the overlay
                     element("uses-permission") {
                         attribute("android:name", SAMSUNG_OVERLAY_PERMISSION)
                     }
