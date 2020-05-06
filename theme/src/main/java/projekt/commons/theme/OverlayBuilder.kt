@@ -54,6 +54,19 @@ class OverlayBuilder(
     private var resourceDirs = emptyArray<String>()
     private var assetDir: String? = null
 
+    // These packages will be exempt from having the SAMSUNG_OVERLAY_PERMISSION added onto it
+    private val needSamsungPermission: Boolean
+        get() {
+            if (ThemeApp.isSamsung) {
+                val standaloneOverlay = listOf(
+                        "com.sec.android.app.music",
+                        "com.sec.android.app.voicenote"
+                )
+                return !standaloneOverlay.contains(targetPackageName)
+            }
+            return false
+        }
+
     /**
      * Adds extra base package (APK) to compile the overlays with. Equivalent
      * with the -I modifiers on AAPT.
@@ -129,15 +142,15 @@ class OverlayBuilder(
                     attribute("android:targetPackage", targetPackageName)
                 }
 
-                if (ThemeApp.isSynergy) {
-                    // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        element("uses-sdk") {
-                            attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
-                        }
+                // Unrooted Samsung (Synergy) Q overlays needs to "target" Q
+                if (ThemeApp.isSynergy && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    element("uses-sdk") {
+                        attribute("android:targetSdkVersion", Build.VERSION.SDK_INT.toString())
                     }
+                }
 
-                    // Proper permission for Synergy devices to utilize the overlay
+                // Proper permission for Samsung devices to utilize the overlay
+                if (needSamsungPermission) {
                     element("uses-permission") {
                         attribute("android:name", SAMSUNG_OVERLAY_PERMISSION)
                     }
