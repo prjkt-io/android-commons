@@ -136,10 +136,12 @@ internal class PieRootBackend : Backend {
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {
-        val n = packages.size
         val commands = ArrayList<String>()
-        for (i in 0 until n) {
-            commands.add(REMOVE_OVERLAY + " " + INSTALL_PREFIX + packages[i] + ".apk")
+        packages.forEach {
+            commands.add("$REMOVE_OVERLAY $INSTALL_PREFIX$it.apk")
+        }
+        packages.forEach {
+            commands.add("$OVERLAY_DISABLE $it")
         }
         if (restartUi) {
             commands.add(KILL_SYSTEMUI)
