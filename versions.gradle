@@ -1,7 +1,7 @@
 ext.versions = [
         minSdk             : 24,
-        targetSdk          : 29,
-        compileSdk         : 29,
+        targetSdk          : 30,
+        compileSdk         : 30,
 
         libraryVersion     : '1.0.0',
         libraryVersionCode : 1,
