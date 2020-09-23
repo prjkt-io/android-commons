@@ -9,8 +9,11 @@ package projekt.commons.theme.backend
 import android.provider.Settings
 import com.topjohnwu.superuser.Shell
 import projekt.commons.theme.BuildConfig
+import projekt.commons.theme.ThemeApp
 import projekt.commons.theme.ThemeApplication
+import projekt.commons.theme.internal.SamsungRootFixGenerator
 import projekt.commons.theme.internal.getApplicationLabel
+import projekt.commons.theme.internal.getOneUiVersion
 import projekt.commons.theme.internal.isPackageInstalled
 import java.util.ArrayList
 import java.util.HashMap
@@ -133,6 +136,11 @@ internal class PieRootBackend : Backend {
             commands.add("chmod 644 $INSTALL_PREFIX${split[split.size - 1]}")
         }
         Shell.su(*commands.toTypedArray()).exec()
+        // Add root fix for OneUI 2
+        val oneUiVersion = ThemeApplication.instance.getOneUiVersion()
+        if (ThemeApp.isSamsung && 2.0 <= oneUiVersion && oneUiVersion < 2.5) {
+            SamsungRootFixGenerator.run()
+        }
     }
 
     override fun uninstallOverlay(packages: List<String>, restartUi: Boolean) {

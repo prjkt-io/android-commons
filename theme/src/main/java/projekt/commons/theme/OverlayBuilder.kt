@@ -10,21 +10,14 @@ import android.os.Build
 import android.util.ArrayMap
 import android.util.Xml
 import androidx.preference.PreferenceManager
-import com.android.apksig.ApkSigner
 import com.topjohnwu.superuser.Shell
 import projekt.commons.buildtools.BuildTools.getAapt
 import projekt.commons.buildtools.BuildTools.getZipalign
 import projekt.commons.theme.ThemeApp.OVERLAY_PERMISSION
 import projekt.commons.theme.ThemeApp.SAMSUNG_OVERLAY_PERMISSION
+import projekt.commons.theme.internal.*
 import projekt.commons.theme.internal.METADATA_INSTALL_TIMESTAMP
-import projekt.commons.theme.internal.attribute
-import projekt.commons.theme.internal.document
-import projekt.commons.theme.internal.element
 import java.io.*
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.cert.X509Certificate
-import java.util.ArrayList
 
 /**
  * A class for building overlays.
@@ -286,28 +279,7 @@ class OverlayBuilder(
         }
 
         // Sign the zipaligned overlay
-        try {
-            ThemeApplication.instance.resources.openRawResource(R.raw.key).use { key ->
-                val keyPass = "overlay".toCharArray()
-                val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-                keyStore.load(key, keyPass)
-                val privateKey = keyStore.getKey("key", keyPass) as PrivateKey
-                val certs = ArrayList<X509Certificate>()
-                certs.add(keyStore.getCertificateChain("key")[0] as X509Certificate)
-
-                val signerConfig = ApkSigner.SignerConfig.Builder("overlay", privateKey, certs).build()
-                val signerConfigs = ArrayList<ApkSigner.SignerConfig>()
-                signerConfigs.add(signerConfig)
-                val apkSigner = ApkSigner.Builder(signerConfigs)
-                apkSigner.setV1SigningEnabled(false)
-                    .setV2SigningEnabled(true)
-                    .setInputApk(aligned)
-                    .setOutputApk(signed)
-                    .setMinSdkVersion(Build.VERSION.SDK_INT)
-                    .build()
-                    .sign()
-            }
-        } catch (e: Exception) {
+        if (!signApk(ThemeApplication.instance, aligned, signed)) {
             return Result.Failure("Failed to sign overlay")
         }
 

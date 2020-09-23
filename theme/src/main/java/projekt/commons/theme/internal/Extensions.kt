@@ -7,12 +7,13 @@
 package projekt.commons.theme.internal
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import projekt.commons.theme.ThemeApplication
+import java.lang.reflect.Field
+
 internal const val METADATA_INSTALL_TIMESTAMP = "install_timestamp"
 
 internal fun String.isPackageInstalled(): Boolean {
@@ -35,6 +36,24 @@ internal fun PackageInfo.getCompatLongVersionCode(): Long {
     }
     @Suppress("DEPRECATION")
     return versionCode.toLong()
+}
+
+internal fun Context.getOneUiVersion(): Double {
+    if (!isSemAvailable()) {
+        return 1.0
+    }
+    val semPlatformIntField: Field = Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT")
+    val version: Int = semPlatformIntField.getInt(null) - 90000
+    return if (version < 0) {
+        1.0
+    } else {
+        ((version / 10000).toString() + "." + version % 10000 / 100).toDouble()
+    }
+}
+
+private fun Context.isSemAvailable(): Boolean {
+    return packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile") ||
+            packageManager.hasSystemFeature("com.samsung.feature.samsung_experience_mobile_lite")
 }
 
 internal val Context.isApplicationDebugable: Boolean
