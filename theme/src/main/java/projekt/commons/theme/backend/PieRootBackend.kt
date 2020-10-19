@@ -7,12 +7,11 @@
 package projekt.commons.theme.backend
 
 import android.provider.Settings
+import androidx.core.content.pm.PackageInfoCompat
 import com.topjohnwu.superuser.Shell
-import projekt.commons.theme.BuildConfig
 import projekt.commons.theme.ThemeApp
 import projekt.commons.theme.ThemeApplication
 import projekt.commons.theme.internal.SamsungRootFixGenerator
-import projekt.commons.theme.internal.getApplicationLabel
 import projekt.commons.theme.internal.getOneUiVersion
 import projekt.commons.theme.internal.isPackageInstalled
 import java.util.ArrayList
@@ -218,13 +217,15 @@ internal class PieRootBackend : Backend {
 
     internal fun installMagiskModule(): Boolean {
         if (!magiskModuleInstalled) {
-            val appLabel = ThemeApplication.instance.packageName.getApplicationLabel()
+            val packageInfo = ThemeApplication.instance.packageManager
+                    .getPackageInfo(ThemeApplication.instance.packageName, 0)
+            val appLabel = packageInfo.applicationInfo.loadLabel(ThemeApplication.instance.packageManager)
             val command = "set -ex \n" +
                     "mkdir -p $MAGISK_MODULE_DIR; " +
                     "printf " +
                     "'name=$appLabel Overlay Helper\n" +
-                    "version=${BuildConfig.VERSION_NAME}\n" +
-                    "versionCode=${BuildConfig.VERSION_CODE}\n" +
+                    "version=${packageInfo.versionName}\n" +
+                    "versionCode=${PackageInfoCompat.getLongVersionCode(packageInfo)}\n" +
                     "author=$appLabel\n" +
                     "description=System-less overlay system for $appLabel\n" +
                     "minMagisk=$MIN_MAGISK_VERSION\n'" +

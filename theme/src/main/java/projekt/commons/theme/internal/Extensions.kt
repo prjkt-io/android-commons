@@ -25,19 +25,6 @@ internal fun String.isPackageInstalled(): Boolean {
     }
 }
 
-internal fun String.getApplicationLabel(): String {
-    return ThemeApplication.instance.packageManager.getApplicationLabel(
-            ThemeApplication.instance.packageManager.getApplicationInfo(this, 0)).toString()
-}
-
-internal fun PackageInfo.getCompatLongVersionCode(): Long {
-    if (Build.VERSION.SDK_INT >= 28) {
-        return longVersionCode
-    }
-    @Suppress("DEPRECATION")
-    return versionCode.toLong()
-}
-
 internal fun Context.getOneUiVersion(): Double {
     if (!isSemAvailable()) {
         return 1.0

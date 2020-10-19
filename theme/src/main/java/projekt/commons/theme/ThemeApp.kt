@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.core.content.pm.PackageInfoCompat
 import com.topjohnwu.superuser.Shell
 import projekt.commons.buildtools.BuildTools.getAapt
 import projekt.commons.theme.backend.AndromedaBackend
@@ -22,7 +23,6 @@ import projekt.commons.theme.backend.RootBackend
 import projekt.commons.theme.backend.SynergyBackend
 import projekt.commons.theme.backend.SubstratumServiceBackend
 import projekt.commons.theme.internal.ThemeAppInitializeActivity
-import projekt.commons.theme.internal.getCompatLongVersionCode
 import projekt.commons.theme.internal.isPackageInstalled
 import java.io.File
 import java.lang.Float.intBitsToFloat
@@ -243,7 +243,7 @@ object ThemeApp {
                     val pInfo = ThemeApplication.instance.packageManager
                             .getPackageInfo(overlayPackageName, PackageManager.GET_META_DATA)
                     return OverlayPackageInfo(overlayPackageName,
-                            pInfo.getCompatLongVersionCode(),
+                            PackageInfoCompat.getLongVersionCode(pInfo),
                             pInfo.versionName,
                             pInfo.applicationInfo.metaData)
                 } catch (ignored: PackageManager.NameNotFoundException) {
