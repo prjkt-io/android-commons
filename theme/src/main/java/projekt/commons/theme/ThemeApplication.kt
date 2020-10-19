@@ -31,6 +31,7 @@ import java.io.File
 open class ThemeApplication : Application() {
 
     companion object {
+        private const val SHELL_TIMEOUT = 10L
         private val isAtleastPie = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
 
         internal lateinit var instance: ThemeApplication
@@ -62,57 +63,33 @@ open class ThemeApplication : Application() {
             pieRootSupported: Boolean = false,
             rootSupported: Boolean = false
         ): Boolean {
+            Shell.enableVerboseLogging = instance.isApplicationDebugable
+            val builder = Shell.Builder.create().setTimeout(SHELL_TIMEOUT)
             // TODO: Choose used backend if multiple supported
             backend = if (andromedaSamsungSupported && isSamsung && !isAtleastPie && isAndromeda &&
                     AndromedaClient.initialize(instance)) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 AndromedaSamsungBackend()
             } else if (andromedaSupported && !isAtleastPie && isAndromeda && AndromedaClient.initialize(instance)) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder
+                    .setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 AndromedaBackend()
             } else if (substratumServiceSupported && isSubstratumService) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 SubstratumServiceBackend()
             } else if (pieRootSupported && isRooted && isAtleastPie) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR)
                 PieRootBackend()
             } else if (rootSupported && isRooted && !isAtleastPie) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR)
                 RootBackend()
             } else if (synergySupported && isSynergyInstalled) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 SynergyBackend()
             } else {
                 return false
             }
+            Shell.setDefaultBuilder(builder)
             return true
         }
 
@@ -130,63 +107,37 @@ open class ThemeApplication : Application() {
             pieRootSupported: Boolean = false,
             rootSupported: Boolean = false
         ): Boolean {
+            Shell.enableVerboseLogging = instance.isApplicationDebugable
+            val builder = Shell.Builder.create().setTimeout(SHELL_TIMEOUT)
             // TODO: Choose used backend if multiple supported
             backend = if (andromedaSamsungSupported && isSamsung && !isAtleastPie && isAndromeda &&
                     AndromedaClient.initialize(instance)) {
                 if (instance.checkSelfPermission(ACCESS_PERMISSION) != PERMISSION_GRANTED) {
                     return false
                 }
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 AndromedaSamsungBackend()
             } else if (andromedaSupported && !isAtleastPie && isAndromeda &&
                     AndromedaClient.initialize(instance)) {
                 if (instance.checkSelfPermission(ACCESS_PERMISSION) != PERMISSION_GRANTED) {
                     return false
                 }
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 AndromedaBackend()
             } else if (substratumServiceSupported && isSubstratumService) {
                 // Should've check for permissive settings too but we already catch everything so
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 SubstratumServiceBackend()
             } else if (pieRootSupported && isRooted && isAtleastPie) {
                 // Root will ask permission if needed
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR)
                 PieRootBackend()
             } else if (rootSupported && isRooted  && !isAtleastPie) {
                 // Root will ask permission if needed
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR)
                 RootBackend()
             } else if (synergySupported && isSynergyInstalled) {
-                Shell.Config.setFlags(
-                        if (instance.isApplicationDebugable) Shell.FLAG_VERBOSE_LOGGING else 0 or
-                                Shell.FLAG_REDIRECT_STDERR or
-                                Shell.FLAG_NON_ROOT_SHELL
-
-                )
+                builder.setFlags(Shell.FLAG_REDIRECT_STDERR or Shell.FLAG_NON_ROOT_SHELL)
                 SynergyBackend()
             } else {
                 return false
